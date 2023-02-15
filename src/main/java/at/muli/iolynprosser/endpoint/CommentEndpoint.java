@@ -7,13 +7,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@CrossOrigin
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/comment")
 public class CommentEndpoint {
@@ -30,7 +31,7 @@ public class CommentEndpoint {
         if (comments.values().stream().anyMatch(storedComment -> storedComment.comment().equals(comment.comment()))) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "comment already present");
         }
-        Comment newComment = new Comment(UUID.randomUUID().toString(), comment.comment());
+        Comment newComment = new Comment(UUID.randomUUID().toString(), comment.comment(), LocalDateTime.now());
         comments.put(newComment.id(), newComment);
         return ResponseEntity.ok(newComment);
     }
@@ -48,6 +49,8 @@ public class CommentEndpoint {
         if (comments.get(id).comment().equals(comment.comment())) {
             throw new ResponseStatusException(HttpStatus.NOT_MODIFIED);
         }
-        return ResponseEntity.ok(comments.put(id, comment));
+        Comment newComment = new Comment(comment.id(), comment.comment(), LocalDateTime.now());
+        comments.put(id, newComment);
+        return ResponseEntity.ok(newComment);
     }
 }
